@@ -292,7 +292,7 @@ services:
       PORT: "4567"
       RACK_ENV: ${RACK_ENV:-production}
     healthcheck:
-      test: ["CMD", "ruby", "-rsocket", "-e", "TCPSocket.new('127.0.0.1',ENV['PORT']).close"]
+      test: ["CMD-SHELL", "ruby -rsocket -e 'TCPSocket.new(\"127.0.0.1\",ENV[\"PORT\"]).close'"]
       interval: 10s
       timeout: 3s
       retries: 5
