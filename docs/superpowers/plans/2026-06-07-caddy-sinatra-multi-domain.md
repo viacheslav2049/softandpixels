@@ -229,26 +229,6 @@ end
 
 Note: we do NOT set `:bind` or `:port` in `app.rb` because the app is run under Puma in production; Puma reads `PORT` from the environment directly, and Sinatra's `:port`/`:bind` settings are ignored by Puma.
 
-- [ ] **Step 7: Implement `app.rb` to make the tests pass (GREEN)**
-
-Replace `app/app.rb` with:
-
-```ruby
-require "sinatra"
-
-set :bind, "0.0.0.0"
-set :port, ENV.fetch("PORT", 4567).to_i
-set :public_folder, File.expand_path("public", __dir__)
-set :host_authorization, { permitted_hosts: [] }
-disable :protection
-set :show_exceptions, false
-set :raise_errors, false
-
-get "/_health" do
-  "ok"
-end
-```
-
 - [ ] **Step 8: Run rspec, expect GREEN**
 
 Run:
