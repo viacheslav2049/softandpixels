@@ -179,13 +179,16 @@ Write `app/public/app.js`:
 console.log("app.js loaded");
 ```
 
-- [ ] **Step 5: Create an empty `app.rb` to confirm the tests fail (RED)**
+- [ ] **Step 5: Create a partial `app.rb` (only static-serving) to confirm the tests fail (RED)**
 
 Write `app/app.rb`:
 ```ruby
 require "sinatra"
+
 set :public_folder, File.expand_path("public", __dir__)
 ```
+
+NOTE: With just this stub, `Rack::Test` requests will return 403, not 200, because **Sinatra 4 enables `host_authorization` by default**, and `Rack::Test` doesn't set a permitted Host header. This is the RED state — every test in Step 6 fails. The Step 7 implementation disables `host_authorization` to make them pass.
 
 - [ ] **Step 6: Run rspec, expect RED**
 
@@ -194,7 +197,7 @@ Run from the project root:
 cd app && bundle exec rspec
 ```
 
-Expected output (4 of 5 tests pass because `set :public_folder` already serves the static files; only `/_health` fails):
+Expected output (all 5 tests fail with 403 because `host_authorization` blocks every request until Step 7 disables it):
 ```
 Failures:
 
@@ -202,14 +205,16 @@ Failures:
      Failure/Error: expect(last_response.status).to eq(200)
 
        expected: 200
-            got: 404
-     # ./spec/app_spec.rb:8:in `block (3 levels) in <top (required)>'
+            got: 403
+  ... (similar for the other 4 tests)
 
 Finished in 0.05 seconds (files took 0.1 seconds to load)
-5 examples, 1 failure
+5 examples, 5 failures
 ```
 
-- [ ] **Step 7: Implement `app.rb` to make the remaining failing test pass (GREEN)**
+If you see a mix of 200/404 (some passing), something is wrong — STOP and re-check the stub in Step 5. The expected intermediate state is that NO tests pass yet.
+
+- [ ] **Step 7: Implement `app.rb` to make all tests pass (GREEN)**
 
 Replace `app/app.rb` with:
 
@@ -225,9 +230,15 @@ set :raise_errors, false
 get "/_health" do
   "ok"
 end
+
+get "/" do
+  send_file File.join(settings.public_folder, "index.html")
+end
 ```
 
-Note: we do NOT set `:bind` or `:port` in `app.rb` because the app is run under Puma in production; Puma reads `PORT` from the environment directly, and Sinatra's `:port`/`:bind` settings are ignored by Puma.
+Note 1: we do NOT set `:bind` or `:port` in `app.rb` because the app is run under Puma in production; Puma reads `PORT` from the environment directly, and Sinatra's `:port`/`:bind` settings are ignored by Puma.
+
+Note 2: Sinatra 4's `static!` method (serving `public_folder` files) does **not** auto-serve `public/index.html` at `/` — it only serves exact-path matches like `/styles.css`. That's why the explicit `get "/"` route is required.
 
 - [ ] **Step 8: Run rspec, expect GREEN**
 
