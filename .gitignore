@@ -1,0 +1,6 @@
+.env
+dev-ca.crt
+.DS_Store
+*.log
+.idea/
+.vscode/
