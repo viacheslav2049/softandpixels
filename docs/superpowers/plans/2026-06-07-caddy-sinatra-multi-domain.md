@@ -287,6 +287,7 @@ cd .. && git add app/app.rb app/config.ru app/public app/spec app/.rspec && git 
 **Files:**
 - Create: `app/Dockerfile`
 - Create: `app/.dockerignore`
+- Create: `app/config/puma.rb`
 
 - [ ] **Step 1: Create `app/.dockerignore`**
 
@@ -305,7 +306,20 @@ dev-ca.crt
 
 This keeps the test group gems and the spec directory out of the runtime image.
 
-- [ ] **Step 2: Create `app/Dockerfile`**
+- [ ] **Step 2: Create `app/config/puma.rb`**
+
+Write `app/config/puma.rb`:
+
+```ruby
+port ENV.fetch("PORT", 4567).to_i
+bind "tcp://0.0.0.0:#{ENV.fetch('PORT', 4567)}"
+threads 1, 5
+workers 0
+```
+
+This is needed because bare `bundle exec puma` in Puma 6.6.1 does NOT reliably honor the `PORT` env var — the container's CMD needs an explicit config. Putting it in `config/puma.rb` is idiomatic for Ruby apps and keeps the port overridable via `ENV PORT=...`.
+
+- [ ] **Step 3: Create `app/Dockerfile`**
 
 Write `app/Dockerfile`:
 
@@ -334,8 +348,30 @@ USER app
 ENV PORT=4567
 EXPOSE 4567
 HEALTHCHECK CMD ruby -rsocket -e 'TCPSocket.new("127.0.0.1",ENV["PORT"]).close'
-CMD ["bundle", "exec", "puma"]
+CMD ["bundle", "exec", "puma", "-C", "config/puma.rb"]
 ```
+
+- [ ] **Step 4: Build the app image**
+
+Run from the project root:
+```sh
+docker build -t softandpixels/app:test ./app
+```
+
+Expected: ends with `Successfully tagged softandpixels/app:test`.
+
+- [ ] **Step 5: Run the container and verify the health endpoint**
+
+```sh
+docker run -d --name app-test -p 4567:4567 softandpixels/app:test
+sleep 3
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:4567/_health   # expect: 200
+curl -s http://localhost:4567/ | grep -q "Hello from Sinatra" && echo OK   # expect: OK
+docker logs app-test 2>&1 | tail -20
+docker stop app-test && docker rm app-test
+```
+
+Expected: `200`, `OK`, and Puma startup logs that include `Listening on http://0.0.0.0:4567` (NOT 9292).
 
 - [ ] **Step 3: Build the app image**
 
@@ -359,10 +395,10 @@ docker stop app-test && docker rm app-test
 
 Expected: `200`, `OK`, and Puma startup logs visible in `docker logs`.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```sh
-git add app/Dockerfile app/.dockerignore && git commit -m "Add multi-stage Dockerfile for Sinatra app"
+git add app/Dockerfile app/.dockerignore app/config/puma.rb && git commit -m "Add multi-stage Dockerfile for Sinatra app"
 ```
 
 ---
