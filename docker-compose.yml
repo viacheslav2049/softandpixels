@@ -1,0 +1,46 @@
+services:
+  proxy:
+    image: softandpixels/proxy:latest
+    build:
+      context: .
+      dockerfile: proxy/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      CADDY_ENV: ${CADDY_ENV:-dev}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL:-}
+      DOMAIN_UPSTREAMS: ${DOMAIN_UPSTREAMS}
+      DEV_DEFAULT_UPSTREAM: ${DEV_DEFAULT_UPSTREAM:-app:4567}
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+    networks: [web]
+
+  app:
+    image: softandpixels/app:latest
+    build: ./app
+    restart: unless-stopped
+    expose:
+      - "4567"
+    environment:
+      PORT: "4567"
+      RACK_ENV: ${RACK_ENV:-production}
+    healthcheck:
+      test: ["CMD-SHELL", "ruby -rsocket -e 'TCPSocket.new(\"127.0.0.1\",ENV[\"PORT\"]).close'"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks: [web]
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  web:
+    driver: bridge
