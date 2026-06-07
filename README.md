@@ -70,6 +70,8 @@ cd app && bundle install && bundle exec rspec
     ├── Gemfile
     ├── app.rb
     ├── config.ru
+    ├── config/
+    │   └── puma.rb            # Puma 6.x PORT-env-var workaround
     ├── public/                # index.html, styles.css, app.js
     └── spec/                  # rspec tests for the Sinatra app
 ```
