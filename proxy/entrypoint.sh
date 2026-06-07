@@ -44,9 +44,10 @@ EOF
   fi
 done
 
-# ---------- Dev-only wildcard block / prod-only :80 redirect ----------
+# ---------- Dev-only wildcard block / prod-only :80 redirect / dev global options ----------
 : > "$TMPDIR/dev_wildcard"
 : > "$TMPDIR/prod_redirect"
+: > "$TMPDIR/global_options"
 if [[ "$CADDY_ENV" == "dev" ]]; then
   cat > "$TMPDIR/dev_wildcard" <<EOF
 
@@ -54,6 +55,10 @@ if [[ "$CADDY_ENV" == "dev" ]]; then
     tls internal
     reverse_proxy ${DEV_DEFAULT_UPSTREAM:-app:4567}
 }
+EOF
+  cat > "$TMPDIR/global_options" <<EOF
+	admin off
+	acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
 EOF
 else
   cat > "$TMPDIR/prod_redirect" <<'EOF'
@@ -68,7 +73,8 @@ fi
 awk \
   -v pdb="$TMPDIR/per_domain" \
   -v dwb="$TMPDIR/dev_wildcard" \
-  -v phr="$TMPDIR/prod_redirect" '
+  -v phr="$TMPDIR/prod_redirect" \
+  -v gob="$TMPDIR/global_options" '
   function read_file(path,    line, content) {
     content = ""
     while ((getline line < path) > 0) content = content line "\n"
@@ -79,17 +85,19 @@ awk \
     pdb_content = read_file(pdb)
     dwb_content = read_file(dwb)
     phr_content = read_file(phr)
+    gob_content = read_file(gob)
   }
   {
     line = $0
     sub(/__PER_DOMAIN_BLOCKS__/, pdb_content, line)
     sub(/__DEV_WILDCARD_BLOCK__/, dwb_content, line)
     sub(/__PROD_HTTP_REDIRECT__/, phr_content, line)
+    sub(/__CADDY_GLOBAL_OPTIONS__/, gob_content, line)
     print line
   }
 ' "$TEMPLATE" > "$OUT"
 
-# ---------- envsubst for {$VAR} placeholders ----------
+# ---------- envsubst for ${VAR} placeholders ----------
 envsubst < "$OUT" > "$OUT.tmp" && mv "$OUT.tmp" "$OUT"
 
 # ---------- Debug ----------
