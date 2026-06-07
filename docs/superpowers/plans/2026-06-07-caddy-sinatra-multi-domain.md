@@ -311,13 +311,14 @@ This keeps the test group gems and the spec directory out of the runtime image.
 Write `app/config/puma.rb`:
 
 ```ruby
-port ENV.fetch("PORT", 4567).to_i
 bind "tcp://0.0.0.0:#{ENV.fetch('PORT', 4567)}"
 threads 1, 5
 workers 0
 ```
 
-This is needed because bare `bundle exec puma` in Puma 6.6.1 does NOT reliably honor the `PORT` env var — the container's CMD needs an explicit config. Putting it in `config/puma.rb` is idiomatic for Ruby apps and keeps the port overridable via `ENV PORT=...`.
+This is needed because bare `bundle exec puma` in Puma 6.6.1 does NOT reliably honor the `PORT` env var. Using `config/puma.rb` is idiomatic and keeps the port overridable via `ENV PORT=...`.
+
+**Important:** do NOT add a separate `port` line — in Puma 6.6.1, both `port N` and `bind "tcp://...:N"` register TCP listeners, and having both on the same port causes `Errno::EADDRINUSE` at startup. Use only `bind`.
 
 - [ ] **Step 3: Create `app/Dockerfile`**
 
