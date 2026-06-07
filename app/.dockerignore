@@ -1,0 +1,9 @@
+.git
+.gitignore
+spec
+.rspec
+*.log
+log
+tmp
+.env*
+dev-ca.crt
