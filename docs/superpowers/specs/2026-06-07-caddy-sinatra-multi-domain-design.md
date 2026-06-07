@@ -171,12 +171,12 @@ run Sinatra::Application
 
 ### 4.1 `Caddyfile.template`
 
-The committed template (`Caddyfile.template`, top-level) is a small file with three substitution points. All heavy lifting is done in `proxy/entrypoint.sh`:
+The committed template (`Caddyfile.template`, top-level) is a small file with four substitution points. All heavy lifting is done in `proxy/entrypoint.sh`:
 
 ```
 {
-	email {$LETSENCRYPT_EMAIL}
-	{$CADDY_GLOBAL_OPTIONS}
+	email ${LETSENCRYPT_EMAIL}
+__CADDY_GLOBAL_OPTIONS__
 }
 __PER_DOMAIN_BLOCKS__
 __DEV_WILDCARD_BLOCK__
@@ -184,8 +184,8 @@ __PROD_HTTP_REDIRECT__
 ```
 
 Substitution conventions:
-- `{$VAR}` is replaced by `envsubst` at run-time. `envsubst` comes from the `gettext` package; the proxy Dockerfile installs it explicitly (see below).
-- `__PLACEHOLDER__` markers are entire block-of-Caddyfile-text substitutions performed by the entrypoint script (writing each block to a temp file and using `awk` or `sed` to splice it in). They are intentionally NOT simple `{$VAR}` substitutions because their values are multi-line.
+- `${VAR}` is replaced by `envsubst` at run-time. (We use bash's `${VAR}` form, not `{$VAR}`, because GNU `envsubst` only recognizes `$VAR` and `${VAR}` — `{$VAR}` would leave the surrounding braces intact and produce invalid Caddyfile syntax.) `envsubst` comes from the `gettext` package; the proxy Dockerfile installs it explicitly.
+- `__PLACEHOLDER__` markers are entire block-of-Caddyfile-text substitutions performed by the entrypoint script (writing each block to a temp file and using `awk` to splice it in). They are intentionally NOT simple `${VAR}` substitutions because their values are multi-line.
 
 **Render-time logic in `entrypoint.sh`:**
 
@@ -203,16 +203,16 @@ Substitution conventions:
      ```
      *.localhost, localhost {
          tls internal
-         reverse_proxy {$DEV_DEFAULT_UPSTREAM:-app:4567}
+         reverse_proxy ${DEV_DEFAULT_UPSTREAM:-app:4567}
      }
      ```
    - `__PROD_HTTP_REDIRECT__` becomes empty.
-   - `CADDY_GLOBAL_OPTIONS` becomes:
+   - `__CADDY_GLOBAL_OPTIONS__` becomes:
      ```
-     admin off
-     acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+     	admin off
+     	acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
      ```
-     The staging CA is a safety net: per-domain blocks use `tls internal`, so Let's Encrypt is never actually contacted in dev. If a future dev block accidentally omits `tls internal`, the staging CA prevents rate-limiting the real production CA.
+     (Indented with a leading tab to align inside the global block.) The staging CA is a safety net: per-domain blocks use `tls internal`, so Let's Encrypt is never actually contacted in dev. If a future dev block accidentally omits `tls internal`, the staging CA prevents rate-limiting the real production CA.
 3. If `CADDY_ENV=prod`:
    - `__PER_DOMAIN_BLOCKS__` becomes, for each pair:
      ```
@@ -229,7 +229,7 @@ Substitution conventions:
      }
      ```
    - `__DEV_WILDCARD_BLOCK__` becomes empty.
-   - `CADDY_GLOBAL_OPTIONS` is unset (empty string).
+   - `__CADDY_GLOBAL_OPTIONS__` becomes empty (no extra content; the email line alone is sufficient for prod).
 
 The final rendered Caddyfile is written to `/etc/caddy/Caddyfile` and the entrypoint execs `caddy run --config /etc/caddy/Caddyfile`. Caddy validates the config on startup; on syntax error the entrypoint exits non-zero and `docker compose up` fails loudly.
 
