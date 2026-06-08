@@ -4,3 +4,7 @@ dev-ca.crt
 *.log
 .idea/
 .vscode/
+
+# Temporary preview files
+.playwright-mcp/
+preview-*.png
