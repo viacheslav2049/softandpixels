@@ -1,6 +1,7 @@
 // Header scroll effect
 (function() {
   const header = document.getElementById('header');
+  if (!header) return;
   window.addEventListener('scroll', function() {
     if (window.scrollY > 50) {
       header.classList.add('scrolled');

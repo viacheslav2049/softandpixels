@@ -25,7 +25,10 @@
   /* Typography */
   --font-display: "Unbounded", Arial, Tahoma, sans-serif;
   --font-body: "Wix Madefor Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --font-mono: "Wix Madefor Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  /* --font-display: "Wix Madefor Display", "Helvetica Neue", Helvetica, Arial, sans-serif; */
+  /* --font-body: "Wix Madefor Display", "Helvetica Neue", Helvetica, Arial, sans-serif; */
+  /* --font-mono: "Wix Madefor Display", "Helvetica Neue", Helvetica, Arial, sans-serif; */
 
   /* Spacing */
   --max-width: 1200px;
@@ -1152,7 +1155,8 @@ header {
   left: 0;
   right: 0;
   z-index: 100;
-  background: transparent;
+  background: black;
+  /* background: transparent; */
   transition: background 0.3s, backdrop-filter 0.3s;
 }
 
@@ -1958,20 +1962,21 @@ h2 {
 }
 
 .faq-item summary::after {
-  content: '';
+  content: '+';
   position: absolute;
   right: 0;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 24px;
-  color: var(--accent);
+  font-size: 42px;
+  color: #555;
   font-family: var(--font-mono);
-  font-weight: 400;
-  transition: transform 0.3s;
+  font-weight: 300;
+  transition: all 0.3s ease;
 }
 
 .faq-item[open] summary::after {
-  content: '';
+  transform: translateY(-50%) rotate(45deg);
+  color: var(--accent);
 }
 
 .faq-answer {
