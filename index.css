@@ -1624,7 +1624,7 @@ h2 {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 64px;
-  align-items: center;
+  align-items: start;
 }
 
 .about-visual {
@@ -1691,6 +1691,26 @@ h2 {
 .section-dark .about-content p:first-child,
 .section-dark-alt .about-content p:first-child {
   color: var(--text-inverse);
+}
+
+.about-team-member {
+  display: flex;
+  flex-direction: column;
+}
+
+.about-team-member h3 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  margin: 12px 0 0 0;
+}
+
+.about-team-member p {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin: 4px 0 0 0;
 }
 
 /* ═══════════════════════════════════════════════════
@@ -2183,15 +2203,15 @@ footer {
   }
 
   .about-grid {
-    grid-template-columns: 1fr;
-    gap: 40px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
   }
 
-.about-left {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
+  .about-left {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
 
 .about-team-member h3 {
   font-family: var(--font-display);
@@ -2207,11 +2227,6 @@ footer {
   color: var(--text-muted);
   margin: 0;
 }
-
-.about-visual {
-    aspect-ratio: 16/9;
-    max-height: 300px;
-  }
 
   .project-grid {
     grid-template-columns: 1fr;
@@ -2254,6 +2269,13 @@ footer {
 
   nav {
     display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .about-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
   }
 }
 
@@ -2317,6 +2339,11 @@ footer {
   .faq-answer {
     font-size: 14px;
     padding-bottom: 16px;
+  }
+
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
   }
 
   .contact-card {
