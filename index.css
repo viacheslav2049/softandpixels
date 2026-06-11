@@ -2213,20 +2213,20 @@ footer {
     gap: 12px;
   }
 
-.about-team-member h3 {
-  font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 600;
-  margin: 0;
-}
+  .about-team-member h3 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+  }
 
-.about-team-member p {
-  font-family: var(--font-body);
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--text-muted);
-  margin: 0;
-}
+  .about-team-member p {
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-muted);
+    margin: 0;
+  }
 
   .project-grid {
     grid-template-columns: 1fr;
@@ -2240,14 +2240,14 @@ footer {
     grid-template-columns: 1fr;
   }
 
-  .faq-card {
-    padding: 28px;
-  }
-
   .faq-item summary {
-    font-size: 16px;
+    font-size: 26px;
     padding: 20px 0;
     padding-right: 36px;
+  }
+
+  .faq-item .faq-answer {
+    font-size: 20px;
   }
 
   .faq-item summary::after {
@@ -2255,7 +2255,7 @@ footer {
   }
 
   h2 {
-    font-size: 28px;
+    font-size: 40px;
   }
 
   .section-header {
