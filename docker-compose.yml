@@ -13,6 +13,7 @@ services:
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL:-}
       DOMAIN_UPSTREAMS: ${DOMAIN_UPSTREAMS}
       DEV_DEFAULT_UPSTREAM: ${DEV_DEFAULT_UPSTREAM:-app:4567}
+      SERVER_IP: ${SERVER_IP:-}
     volumes:
       - caddy_data:/data
       - caddy_config:/config

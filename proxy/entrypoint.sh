@@ -61,7 +61,18 @@ EOF
 	acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
 EOF
 else
-  cat > "$TMPDIR/prod_redirect" <<'EOF'
+  FIRST_UPSTREAM="${PAIRS[0]#*=}"
+  : > "$TMPDIR/prod_redirect"
+  if [[ -n "${SERVER_IP:-}" ]]; then
+    cat >> "$TMPDIR/prod_redirect" <<EOF
+
+${SERVER_IP}:80 {
+    reverse_proxy ${FIRST_UPSTREAM}
+    encode gzip zstd
+}
+EOF
+  fi
+  cat >> "$TMPDIR/prod_redirect" <<'EOF'
 
 :80 {
     redir https://{host}{uri} permanent
