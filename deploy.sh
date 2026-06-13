@@ -12,10 +12,6 @@ echo "🚀 Deploy started (branch: $BRANCH)..."
 echo "📤 Pushing code to server $BRANCH branch..."
 git push deploy "$BRANCH"
 
-# Copy .env
-echo "🔑 Copying environment file..."
-scp .env "$USER@$SERVER:$APP_DIR/.env"
-
 # Remote deploy
 ssh "$USER@$SERVER" << EOF
   set -e
@@ -23,6 +19,7 @@ ssh "$USER@$SERVER" << EOF
   cd "$APP_DIR"
 
   echo "📥 Pulling latest code..."
+  git checkout .env 2>/dev/null || true
   git pull --no-edit 2>/dev/null || {
     git branch --set-upstream-to=origin/$BRANCH $BRANCH 2>/dev/null || true
     git pull --no-edit
