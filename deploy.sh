@@ -23,13 +23,16 @@ ssh "$USER@$SERVER" << EOF
   cd "$APP_DIR"
 
   echo "📥 Pulling latest code..."
-  git pull
+  git pull --no-edit 2>/dev/null || {
+    git branch --set-upstream-to=origin/$BRANCH $BRANCH 2>/dev/null || true
+    git pull --no-edit
+  }
 
   echo "🐳 Rebuilding and restarting containers..."
   docker-compose up -d --build
 
-  # echo "🧹 Cleaning up old images..."
-  # docker image prune -f
+  echo "🧹 Cleaning up old images..."
+  docker image prune -f
 
-  # echo "✅ Deploy finished!"
+  echo "✅ Deploy finished!"
 EOF
