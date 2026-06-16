@@ -1,10 +1,11 @@
 # Makefile for softandpixels
 #
 # Targets:
-#   make up     - Build and start containers
-#   make down   - Stop containers (preserve volumes)
-#   make logs   - Follow container logs
+#   make up     - Build and start containers locally
+#   make down   - Stop containers locally (preserve volumes)
+#   make logs   - Follow container logs locally
 #   make trust  - Trust the dev CA certificate (macOS/Linux)
+#   make deploy - Push code to server and restart containers
 
 up:
 	docker compose up -d --build
@@ -46,4 +47,7 @@ trust:
 		exit 1; \
 	fi'
 
-.PHONY: up down logs trust
+deploy:
+	./deploy.sh
+
+.PHONY: up down logs trust deploy
